@@ -4,3 +4,99 @@ author: "Ling Yi"
 date: "10/6/2020"
 output: github_document
 ---
+
+
+
+##Problem 1
+
+Loading required packages
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+library(devtools)
+devtools::install_github("p8105/p8105.datasets")
+library(p8105.datasets)
+data("instacart")
+```
+
+describing the dataset
+
+```{r}
+instacart %>% 
+  count(aisle) %>% 
+  arrange(desc(n))
+```
+
+Let's make a plot
+
+```{r}
+instacart %>% 
+  count(aisle) %>% 
+  filter(n>10000) %>% 
+  mutate(
+    aisle = factor(aisle),
+    aisle = fct_reorder(aisle, n)
+  ) %>% 
+  ggplot(aes(x=aisle, y=n))+
+  geom_point()+
+  theme(axis.text.x = element_text(angle = 90, bjust = 0.5, hjust=1))
+```
+
+making a table
+
+```{r}
+instacart %>% 
+  filter(aisle %in% c("baking ingredients", "dog food care", "packaged vegetables fruits")) %>% 
+  group_by(aisle) %>%
+  count(product_name) %>% ##This will keep aisle and counting the product name
+  mutate(rank = min_rank(desc(n))) %>% 
+  filter(rank<4) %>% 
+  arrange(aisle,rank) %>% 
+  knitr::kable()
+```
+
+apples vs ice cream..
+
+```{r}
+instcart %>% 
+  filter(product_name %in% c("Pink Lady Apples", "Coffee Ice Cream")) %>% 
+  group_by(product_name) %>% 
+  summarize(mean_hour = mean(order_hour_of_day)) %>% 
+  pivot_wider(
+    names_from = order_dow, 
+    values_from = mean_hour
+  )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
