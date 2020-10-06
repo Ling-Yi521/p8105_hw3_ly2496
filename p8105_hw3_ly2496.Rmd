@@ -1,0 +1,6 @@
+---
+title: "Homework 3 Solution"
+author: "Ling Yi"
+date: "10/6/2020"
+output: github_document
+---
