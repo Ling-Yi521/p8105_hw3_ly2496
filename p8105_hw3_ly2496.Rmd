@@ -82,15 +82,36 @@ instacart %>%
 	pivot_wider(
 		names_from = order_dow,
 		values_from = mean_hour
-	)
+	) %>% 
+  knitr::kable()
 ```
 
+#Problem 2
+
+#load and tidy data
+
+```{r}
+acceler_df = read_csv("./data/accel_data.csv") %>% 
+  janitor::clean_names() %>% 
+  pivot_longer(
+      activity_1:activity_1440,
+      names_to = "activity_num", 
+      names_prefix = "activity_",
+      values_to = "activity_counts"
+  ) %>% 
+  mutate(
+      day_binary = ifelse(day ==  "Saturday" | day == "Sunday" , "weekend", "weekday"),
+      activity_counts = as.numeric(activity_counts)
+  )
+
+``` 
+
+##describing the data set
+
+This data set contains information on five weeks of accelerometer data collected on a 63 year-old male with BMI of 25 diagnoised with congestive heart failure. The data set contains `r nrow(acceler_df)` rows and `r ncol(acceler_df)` variables. The variables included in this data set are `r names(acceler_df)`. Activity_counts describes the activity counts for each minute of a 24 hour day starting at midnight and day_binary categorizes days of the week into either 'weekend' or 'weekday'.
 
 
-
-
-
-
+##
 
 
 
