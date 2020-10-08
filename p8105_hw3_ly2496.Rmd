@@ -111,9 +111,85 @@ acceler_df = read_csv("./data/accel_data.csv") %>%
 This data set contains information on five weeks of accelerometer data collected on a 63 year-old male with BMI of 25 diagnoised with congestive heart failure. The data set contains `r nrow(acceler_df)` rows and `r ncol(acceler_df)` variables. The variables included in this data set are `r names(acceler_df)`. Activity_counts describes the activity counts for each minute of a 24 hour day starting at midnight and day_binary categorizes days of the week into either 'weekend' or 'weekday'.
 
 
-##
+##table showing activity by day
+
+```{r}
+acceler_df %>% 
+  group_by(week, day) %>% 
+  summarize(sum_act = (sum(activity_counts)) 
+ ) %>% 
+  pivot_wider(
+    names_from=day,
+    values_from=sum_act
+  ) %>% 
+  knitr::kable()
+```
+
+##plot of minute and activity by day
+
+```{r}
+##work on this later
+acceler_df %>% 
+  ggplot(aes (x=activity_num, y=activity_counts, colors=day))+
+  geom_point()
+```
 
 
+#Problem 3
+
+```{r}
+library(p8105.datasets)
+data("ny_noaa")
+```
+
+##clean and tidy data
+
+```{r}
+ny_noaa = ny_noaa %>%
+    separate(date, into = c("year", "month", "day"), convert = TRUE)
+
+month_df=
+  tibble(
+    month = 1:12,
+    month_name=month.name
+  ) 
+ny_noaa = left_join(ny_noaa, month_df, by = "month") %>% 
+   select(-c("month")) %>% 
+   relocate("id", "year", "month_name", "day")
+```
+
+##common values for snowfall
+
+```{r}
+ny_noaa %>% 
+  mutate(
+    snow = as.factor(snow)
+  ) %>% 
+  count()
+```
+
+##Two panel plot
+
+```{r}
+ny_noaa %>% 
+  mutate(
+    tmin = as.numeric(tmin),
+    tmax = as.numeric(tmax)
+  ) %>% 
+  filter(month_name == "January" | month_name == "July") %>% 
+  group_by(id, year, month_name) %>% 
+  summarize(avg_max = mean(tmax, na.rm=TRUE,)) %>% 
+  ggplot(aes(x=year, y=avg_max))+
+  geom_point()+
+  geom_path(aes(color = id), alpha = 05, show.legend=FALSE)+
+  facet_grid(~ month_name)+
+  labs(
+    title = "Average max temp. for January and July by station and year",
+    x = "Year",
+    y = "Average max temperature (C)"
+  )
+
+```
 
 
 
