@@ -138,17 +138,17 @@ acceler_df %>%
 #Problem 3
 
 ```{r}
-library(p8105.datasets)
 data("ny_noaa")
 ```
 
 ##clean and tidy data
 
 ```{r}
-ny_noaa = ny_noaa %>%
-    separate(date, into = c("year", "month", "day"), convert = TRUE)
+ny_noaa_df = ny_noaa %>%
+    separate(date, into = c("year", "month", "day"), convert = TRUE) %>% 
+    
 
-month_df=
+month_df =
   tibble(
     month = 1:12,
     month_name=month.name
@@ -166,6 +166,7 @@ ny_noaa %>%
     snow = as.factor(snow)
   ) %>% 
   count()
+##Add in geom smooth
 ```
 
 ##Two panel plot
@@ -176,12 +177,12 @@ ny_noaa %>%
     tmin = as.numeric(tmin),
     tmax = as.numeric(tmax)
   ) %>% 
-  filter(month_name == "January" | month_name == "July") %>% 
   group_by(id, year, month_name) %>% 
+  filter(month_name == "January" | month_name == "July") %>% 
   summarize(avg_max = mean(tmax, na.rm=TRUE,)) %>% 
-  ggplot(aes(x=year, y=avg_max))+
+  ggplot(aes(x=year, y=avg_max, group = id))+
   geom_point()+
-  geom_path(aes(color = id), alpha = 05)+
+  geom_path(alpha = 05, size = .3)+
   facet_grid(~ month_name)+
   labs(
     title = "Average max temp. for January and July by station and year",
@@ -207,13 +208,14 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-
+##making the plot for tmin and tmax
 ```{r}
 install.packages("hexbin")
 library(hexbin)
-install.packages("patchwork")
+library(patchwork)
+  
+tmax_tmin_plot = 
 ny_noaa %>% 
-  filter(snow<=100) %>% 
   mutate(
     prcp = as.numeric(prcp),
     tmin = as.numeric(tmin),
@@ -226,10 +228,41 @@ ny_noaa %>%
   ) %>% 
   drop_na(tmax, tmin) %>% 
   ggplot(aes(x=tmax, y=tmin))+
-  geom_hex()
-  
+  geom_hex()+
+  labs(
+    title = "Maximum and Minimum Tempterature (C)",
+    x = "Minimun Temerature",
+    y = "minimum Temperature"
+      )
+```
+
+##making the snow fall plot
+
+```{r, fig.height=6, fig.width =8}
+
+snowfall_plot =  
+  ny_noaa %>% 
+  filter(snow<=100 & snow>0) %>% 
+  mutate(
+    year = as.factor(year)
+  ) %>% 
+  ggplot(aes(x=year, y=snow, color = year))+
+  geom_violin(aes(fill = year), alpha = .5)+
+  theme(legend.position = "none")+
+  labs(
+    title = "Snowfall (mm) by year",
+    x = "Year",
+    y = "Snowfall (mm)"
+      )
   
 ```
+
+##combining the work with patchwork
+
+```{r}
+tmax_tmin_plot /snowfall_plot
+```
+
 
 
 
