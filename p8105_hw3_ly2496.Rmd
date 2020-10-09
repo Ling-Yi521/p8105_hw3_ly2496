@@ -13,11 +13,12 @@ Loading required packages
 
 ```{r setup, include=TRUE}
 library(tidyverse)
-library(p8105.datasets)
 ```
 
 
 ```{r}
+
+library(p8105.datasets)
 data("instacart")
 ```
 
@@ -130,8 +131,21 @@ acceler_df %>%
 ```{r}
 ##work on this later
 acceler_df %>% 
-  ggplot(aes (x=activity_num, y=activity_counts, colors=day))+
-  geom_point()
+  mutate(
+    activity_num = as.numeric(activity_num)
+  ) %>% 
+  ggplot(aes (x=activity_num, y=activity_counts, color = day))+
+  geom_line(alpha = .5)+
+  geom_smooth()+
+    labs(
+      title = "Plot of minute and activity counts", 
+      x = "minute of the day", 
+      y = "activity counts"
+  )+
+    scale_x_continuous(
+    breaks = c(0,360, 720, 1080, 1440), 
+    labels = c("0", "360", "720", "1080", "1440"))
+
 ```
 
 
@@ -145,26 +159,48 @@ data("ny_noaa")
 
 ```{r}
 ny_noaa_df = ny_noaa %>%
-    separate(date, into = c("year", "month", "day"), convert = TRUE) %>% 
+    separate(date, into = c("year", "month", "day")) %>% 
+    mutate(
+      month = as.numeric(month), 
+      prcp = as.numeric(prcp),
+      tmin = as.numeric(tmin),
+      tmax = as.numeric(tmax),
+      year = as.factor(year)
+  ) %>% 
+   mutate(
+    tmin = tmin/10,
+    tmax = tmax/10,
+    prcp = prcp/10
+    )
     
-
 month_df =
   tibble(
     month = 1:12,
     month_name=month.name
   ) 
-ny_noaa = left_join(ny_noaa, month_df, by = "month") %>% 
+ny_noaa_df = left_join(ny_noaa_df, month_df, by = "month") %>% 
    select(-c("month")) %>% 
    relocate("id", "year", "month_name", "day")
 ```
 
 ##common values for snowfall
 
+```{r settings, message=FALSE}
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
 ```{r}
 ny_noaa %>% 
   mutate(
     snow = as.factor(snow)
   ) %>% 
+  distinct(snow) %>% 
   count()
 ##Add in geom smooth
 ```
@@ -172,11 +208,7 @@ ny_noaa %>%
 ##Two panel plot
 
 ```{r}
-ny_noaa %>% 
-  mutate(
-    tmin = as.numeric(tmin),
-    tmax = as.numeric(tmax)
-  ) %>% 
+ny_noaa_df %>% 
   group_by(id, year, month_name) %>% 
   filter(month_name == "January" | month_name == "July") %>% 
   summarize(avg_max = mean(tmax, na.rm=TRUE,)) %>% 
@@ -196,27 +228,14 @@ ny_noaa %>%
 
 ##making a hex plot
 
-```{r settings, message=FALSE}
-theme_set(theme_minimal() + theme(legend.position = "bottom"))
-
-options(
-  ggplot2.continuous.colour = "viridis",
-  ggplot2.continuous.fill = "viridis"
-)
-
-scale_colour_discrete = scale_colour_viridis_d
-scale_fill_discrete = scale_fill_viridis_d
-```
-
 ##making the plot for tmin and tmax
 ```{r}
-install.packages("hexbin")
 library(hexbin)
 library(patchwork)
   
 tmax_tmin_plot = 
-ny_noaa %>% 
-  mutate(
+ny_noaa_df %>% 
+   mutate(
     prcp = as.numeric(prcp),
     tmin = as.numeric(tmin),
     tmax = as.numeric(tmax)
@@ -241,7 +260,10 @@ ny_noaa %>%
 ```{r, fig.height=6, fig.width =8}
 
 snowfall_plot =  
-  ny_noaa %>% 
+  ny_noaa_df %>% 
+  mutate(
+    year = as.factor(year)
+  ) %>% 
   filter(snow<=100 & snow>0) %>% 
   mutate(
     year = as.factor(year)
@@ -254,13 +276,12 @@ snowfall_plot =
     x = "Year",
     y = "Snowfall (mm)"
       )
-  
 ```
 
-##combining the work with patchwork
+##combining the work with patchwork 
 
 ```{r}
-tmax_tmin_plot /snowfall_plot
+tmax_tmin_plot/snowfall_plot
 ```
 
 
