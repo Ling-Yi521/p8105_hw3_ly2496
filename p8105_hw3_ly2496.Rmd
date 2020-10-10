@@ -185,6 +185,20 @@ ny_noaa_df = left_join(ny_noaa_df, month_df, by = "month") %>%
 
 ##common values for snowfall
 
+```{r}
+ny_noaa_df %>% 
+  mutate(
+    snow = as.factor(snow)
+  ) %>% 
+  group_by(snow) %>% 
+  count() %>% 
+  arrange(desc(n))
+
+
+##The most common snowfall observation is zero. This is because there is only the chance for snow during the winter, so the most common observed is 0 mm. The most common non-zero non-missing value for snowfall is 25 mm. 
+
+```
+
 ```{r settings, message=FALSE}
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 options(
