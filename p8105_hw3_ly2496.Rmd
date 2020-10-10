@@ -209,16 +209,6 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-```{r}
-ny_noaa %>% 
-  mutate(
-    snow = as.factor(snow)
-  ) %>% 
-  distinct(snow) %>% 
-  count()
-##Add in geom smooth
-```
-
 ##Two panel plot
 
 ```{r}
@@ -238,7 +228,7 @@ ny_noaa_df %>%
   theme(legend.position = "none")
 
 ```
-
+On average, the maximum temperature for for July is about 30 (C) greater then the maximum temperature in January. There are a couple of outliers for the average maximum temperature in July when it was measured to be about 14 (C). There are also one outlier for the maximum temperature in January where it was measured to be about -14 (C).
 
 ##making a hex plot
 
